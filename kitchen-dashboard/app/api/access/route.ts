@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { deleteRow, getRow, getRowBy, insertRow, listRows, updateRow } from "../../../lib/supabase";
 import { getKitchenActor, type KitchenRole } from "../../../lib/supabase-auth";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 type KitchenAccess = { id: string; email: string; role: KitchenRole; createdAt: string };
 const json = (data: unknown, status = 200) => NextResponse.json(data, { status });

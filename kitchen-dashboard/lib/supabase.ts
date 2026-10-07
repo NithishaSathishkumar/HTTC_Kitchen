@@ -1,11 +1,10 @@
-import { env } from "cloudflare:workers";
+import {getSupabaseEnvironment} from "./supabase-environment";
 
 export type KitchenTable = "inventory" | "volunteers" | "shifts" | "expenses" | "kitchen_access" | "change_requests" | "kitchen_calendar";
 type RecordRow = Record<string, unknown>;
 
 function connection() {
-  const url = env.SUPABASE_URL?.replace(/\/$/, "");
-  const key = env.SUPABASE_SECRET_KEY;
+  const {url, serverKey: key} = getSupabaseEnvironment();
   if (!url || !key) throw new Error("Supabase is not connected yet. Add the project URL and server key in site settings.");
   return { url, key };
 }

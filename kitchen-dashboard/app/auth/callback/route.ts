@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createKitchenAuthClient } from "../../../lib/supabase-auth";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);

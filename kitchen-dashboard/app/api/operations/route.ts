@@ -4,7 +4,7 @@ import { getKitchenActor } from "../../../lib/supabase-auth";
 import { inventoryItemKey, MAX_IMPORT_ITEMS, validateImportedItem, type ImportedInventoryItem } from "../../../lib/inventory-import-data";
 import {readInventory, updateCombinedInventory} from "../../../lib/inventory";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 type Volunteer = { id: string; name: string; hours: number; isActive: boolean };
 type Shift = { id: string; volunteerId: string; checkedInAt: string | null; checkedOutAt: string | null };

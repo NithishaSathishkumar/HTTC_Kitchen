@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { env } from "cloudflare:workers";
+import {getSupabaseEnvironment} from "@/lib/supabase-environment";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const url = env.SUPABASE_URL?.replace(/\/$/, "");
-  const publishableKey = env.SUPABASE_API_KEY;
+  const {url, publishableKey} = getSupabaseEnvironment();
   if (!url || !publishableKey) {
     return NextResponse.json({ error: "Supabase Auth is not configured for this app." }, { status: 503 });
   }

@@ -33,6 +33,23 @@ Only an Admin can open Team access. Kitchen API routes check each signed-in acco
 1. Run [`supabase/schema.sql`](supabase/schema.sql) in the Supabase SQL Editor. It adds volunteer fields plus access, calendar, and change-request tables without changing existing kitchen records or access assignments. Big events can span multiple dates, with separate meal plans and cook assignments for each day.
 2. Add `SUPABASE_URL` and `SUPABASE_SECRET_KEY` to the Site's production environment settings. Use a server-only secret key; it is never sent to the browser.
 
+## Deploy on Vercel
+
+Import the `HTTC_Kitchen` GitHub repository into Vercel and use these project settings:
+
+- Root Directory: `kitchen-dashboard`
+- Framework Preset: Next.js
+- Build Command: `npm run build:vercel` (configured in `vercel.json`)
+- Install Command: `npm ci`
+- Output Directory: leave the default Next.js setting
+- Node.js: 22.x or newer
+
+Add `SUPABASE_URL`, `SUPABASE_API_KEY` (publishable/anon key), and `SUPABASE_SECRET_KEY` (server secret/service role key) in Vercel Environment Variables for Production and any Preview environment you use. The existing `.env.local` file is ignored by Git and is not uploaded to Vercel. The server also accepts `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` / `NEXT_PUBLIC_SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` as aliases.
+
+After deploying, add the actual production domain plus `/auth/callback` to the allowed redirect URLs in Supabase Authentication → URL Configuration, and set the Supabase Site URL to that domain. Keep the Google OAuth redirect URI pointing at the Supabase project's `/auth/v1/callback` URL.
+
+`npm run build:vercel` creates the Next.js production build; `npm run start:vercel` runs it locally. Vercel also automatically uses Next.js when it runs `npm run build` with `VERCEL=1`. The existing local `npm run dev` and Cloudflare build remain available.
+
 ## Google sign-in
 
 The dashboard uses Supabase Auth with Google OAuth and a PKCE callback. Its kitchen API checks the signed-in Supabase user before reading or changing records. The publishable API key is used for Auth; the Supabase secret key remains server-side for database operations.

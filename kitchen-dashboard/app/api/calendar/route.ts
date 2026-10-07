@@ -4,7 +4,7 @@ import { getKitchenActor } from "../../../lib/supabase-auth";
 import {readInventory} from "../../../lib/inventory";
 import {convertInventoryQuantity} from "../../../lib/inventory-import-data";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 type Volunteer = { id: string; name: string; isActive: boolean };
 type InventoryItem = { id: string; name: string; unit: string };
@@ -121,7 +121,8 @@ async function getVolunteerAndInventoryIndexes() {
   };
 }
 
-async function eventValues(body: Record<string, unknown>) {
+type EventValues = {date: string; endDate: string; title: string; details: string | null; eventKind: "normal" | "festive"; festivePlan: EventFestivePlan | FestivePlan | null};
+async function eventValues(body: Record<string, unknown>): Promise<{values: EventValues} | {error: string}> {
   const title = clean(body.title);
   const details = clean(body.details, 500);
   const date = clean(body.date, 10);
@@ -138,8 +139,8 @@ async function eventValues(body: Record<string, unknown>) {
     const {volunteerById, inventoryById} = await getVolunteerAndInventoryIndexes();
     normalized = await normalizeFestivePlan(body.festivePlan, date, endDate, volunteerById, inventoryById);
   }
-  if (normalized.error) return normalized;
-  return { values: { date, endDate, title, details: details || null, eventKind, festivePlan: normalized.plan } };
+  if (normalized.error) return {error: normalized.error};
+  return { values: { date, endDate, title, details: details || null, eventKind, festivePlan: normalized.plan ?? null } };
 }
 
 async function getActor() {
@@ -195,9 +196,9 @@ export async function POST(request: Request) {
     const date = clean(body.date, 10);
     if (!validDate(date)) return json({ error: "Choose a valid event date." }, 400);
     const result = await eventValues(body);
-    if (result.error) return json({ error: result.error }, 400);
+    if ("error" in result) return json({ error: result.error }, 400);
     const [created] = await insertRow("kitchen_calendar", {
-      id: crypto.randomUUID(), date, entryType: "event", ...result.values,
+      id: crypto.randomUUID(), entryType: "event", ...result.values,
       mealPeriod: null, volunteerId: null, cookName: null,
       createdBy: auth.actor.email, createdAt: new Date().toISOString(),
     });
@@ -234,7 +235,7 @@ export async function PUT(request: Request) {
       const {volunteerById, inventoryById} = await getVolunteerAndInventoryIndexes();
       const stored = existing.festivePlan;
       const days = stored ? "days" in stored ? {...stored.days} : {[existing.date]: stored} : {};
-      const day = days[date] || Object.fromEntries(mealPeriods.map(key => [key, emptyMeal()])) as FestivePlan;
+      const day = days[date] || {morning: emptyMeal(), afternoon: emptyMeal(), evening: emptyMeal()};
       // Keep previously assigned helpers available for removal even if they became inactive.
       for (const helper of day[period].helperVolunteers) {
         if (!volunteerById.has(helper.id)) volunteerById.set(helper.id, {...helper, isActive: false});
@@ -256,7 +257,7 @@ export async function PUT(request: Request) {
       const existing = id ? await getRow<CalendarEntry>("kitchen_calendar", id) : undefined;
       if (!existing || existing.entryType !== "event") return json({ error: "That calendar event could not be found." }, 404);
       const result = await eventValues(body);
-      if (result.error) return json({ error: result.error }, 400);
+      if ("error" in result) return json({ error: result.error }, 400);
       const values = result.values!;
       if (values.eventKind === "festive" && !values.festivePlan && existing.festivePlan) values.festivePlan = existing.festivePlan;
       await updateRow("kitchen_calendar", id, values);

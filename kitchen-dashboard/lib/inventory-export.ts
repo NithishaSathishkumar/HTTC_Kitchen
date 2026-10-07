@@ -19,8 +19,8 @@ function crc32(bytes: Uint8Array) {
 }
 
 function zipStore(files: { name: string; content: string }[]) {
-  const localParts: Uint8Array[] = [];
-  const centralParts: Uint8Array[] = [];
+  const localParts: Uint8Array<ArrayBuffer>[] = [];
+  const centralParts: Uint8Array<ArrayBuffer>[] = [];
   let offset = 0;
   const u16 = (view: DataView, at: number, value: number) => view.setUint16(at, value, true);
   const u32 = (view: DataView, at: number, value: number) => view.setUint32(at, value, true);

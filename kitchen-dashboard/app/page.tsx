@@ -637,7 +637,8 @@ function BigEventShopping({plans, inventory, dateLabel}: {plans: Record<string, 
 }
 
 function blankFestivePlan(): FestivePlan {
-  return Object.fromEntries(mealPeriods.map(({id}) => [id, {cookVolunteerId: null, cookName: null, helperVolunteerIds: [], helperVolunteers: [], dishes: "", ingredients: []}])) as FestivePlan;
+  const emptyMeal = (): FestiveMeal => ({cookVolunteerId: null, cookName: null, helperVolunteerIds: [], helperVolunteers: [], dishes: "", ingredients: []});
+  return {morning: emptyMeal(), afternoon: emptyMeal(), evening: emptyMeal()};
 }
 
 function aggregatePlans(plans: Record<string, FestivePlan>): FestivePlan {

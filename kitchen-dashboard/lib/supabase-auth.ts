@@ -1,14 +1,13 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import { env } from "cloudflare:workers";
+import {getSupabaseEnvironment} from "./supabase-environment";
 import { callKitchenRpc, getRowBy } from "./supabase";
 
 export type KitchenRole = "admin" | "staff" | "viewer";
 type KitchenAccess = { id: string; email: string; role: KitchenRole };
 
 export async function createKitchenAuthClient() {
-  const url = env.SUPABASE_URL?.replace(/\/$/, "");
-  const key = env.SUPABASE_API_KEY;
+  const {url, publishableKey: key} = getSupabaseEnvironment();
   if (!url || !key) {
     throw new Error("Supabase Auth needs SUPABASE_URL and the publishable SUPABASE_API_KEY.");
   }

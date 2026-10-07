@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getRow, getRowBy, insertRow, listRows, updateRow } from "../../../lib/supabase";
 import { getKitchenActor } from "../../../lib/supabase-auth";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 type ChangeRequest = {
   id: string;

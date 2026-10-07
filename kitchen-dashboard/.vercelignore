@@ -1,0 +1,15 @@
+.git/
+.env*
+.dev.vars*
+*.pem
+node_modules/
+.next/
+.vinext/
+dist/
+.wrangler/
+.sites-runtime/
+.agents/
+.codex/
+outputs/
+work/
+*.tsbuildinfo
